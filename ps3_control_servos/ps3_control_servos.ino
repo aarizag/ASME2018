@@ -8,10 +8,7 @@ USB Usb;
 BTD Btd(&Usb);
 PS3BT PS3(&Btd);
 
-/*Create instances of type Servo. 'right' is the right side servo and 'left' is the left side servo.*/
-Servo right;                                                         
-Servo left;
-bool start = false;
+
 
 void setup() {
    Serial.begin(9600);
@@ -24,10 +21,18 @@ void setup() {
 }
 
 /* Create global Variables for loop*/
-int x;         // Raw x-axis input from analog
-int y;         // Raw y-axis input from analog
 int leftVal;   // Altered value to be used in the left servo 
 int rightVal;  // Altered value to be used in the right servo
+int x;         // Raw x-axis input from analog
+int y;         // Raw y-axis input from analog
+           // x and y will return a value between 0 and 255
+           // 0 will rotate servo forward, 255 will rotate backwards
+
+/*Create instances of type Servo. 'right' is the right side servo and 'left' is the left side servo.*/
+Servo right;                                                         
+Servo left;
+bool start = false;  // Bool variable used to prevent premature servo rotation
+
 void loop()
 {
  
@@ -45,19 +50,12 @@ void loop()
   
   if (start) {
     x = PS3.getAnalogHat(LeftHatX);
-//    Serial.print("X: ");
-//    Serial.println(x);
-    y = PS3.getAnalogHat(LeftHatY);
-//    Serial.print("Y: ");
-//    Serial.print(y);
 
+    y = PS3.getAnalogHat(LeftHatY);
+    
     leftVal = y - (x - 127);
-    Serial.print("Left: ");
-    Serial.print(valCap(leftVal));
     
     rightVal = x + (y - 127);
-    Serial.print("Right: ");
-    Serial.println(valCap(rightVal));
     
     right.write(map(valCap(rightVal), 0, 1023, 0, 180));
     left.write(map(valCap(leftVal), 0, 1023, 180, 0)); 
@@ -69,7 +67,6 @@ void loop()
    * cap minimum value at 0
    * create "deadzone" in the middle of the analog to prevent servo drift
    */
-  
 int valCap(int val){
   
   if (val > 122 && val < 132){

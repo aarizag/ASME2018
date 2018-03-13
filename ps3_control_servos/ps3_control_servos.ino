@@ -9,7 +9,6 @@ BTD Btd(&Usb);
 PS3BT PS3(&Btd);
 
 
-
 void setup() {
    Serial.begin(9600);
   
@@ -31,6 +30,9 @@ int y;         // Raw y-axis input from analog
 /*Create instances of type Servo. 'right' is the right side servo and 'left' is the left side servo.*/
 Servo right;                                                         
 Servo left;
+Servo launcherRight;
+Servo launcherLeft;
+
 bool start = false;  // Bool variable used to prevent premature servo rotation
 
 void loop()
@@ -45,21 +47,39 @@ void loop()
       // Attach servos to power once PS button is pressed
       right.attach(3);                                               
       left.attach(5);
+      launcherRight.attach(4);
+      launcherLeft.attach(2);
     }
   }
   
   if (start) {
     x = PS3.getAnalogHat(LeftHatX);
+    Serial.print("X: ");
+    Serial.print(x);
 
     y = PS3.getAnalogHat(LeftHatY);
+    Serial.print("       Y: ");
+    Serial.println(y);
     
     leftVal = y - (x - 127);
+    Serial.print("Left: ");
+    Serial.print(valCap(leftVal));
     
     rightVal = x + (y - 127);
+    Serial.print("          Right: ");
+    Serial.println(valCap(rightVal));
     
-    right.write(map(valCap(rightVal), 0, 1023, 0, 180));
-    left.write(map(valCap(leftVal), 0, 1023, 180, 0)); 
-    
+    right.write(map(255 - valCap(rightVal), 0, 1023, 0, 180));
+    left.write(map(255 - valCap(leftVal), 0, 1023, 180, 0)); 
+ 
+    if(PS3.getButtonPress(R1)){
+      launcherRight.write(180);
+      launcherLeft.write(180);
+    }
+    else{
+      launcherRight.write(127);
+      launcherLeft.write(127);
+    }
   }
 }
 

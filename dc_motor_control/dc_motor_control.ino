@@ -4,7 +4,7 @@
 
 USB usb;
 BTD btd(&usb);
-PS3BT ps3(&btd);
+PS3BT ps3(&btd, PAIR);
 
 const byte mtr1 [2] = {9,10}; // motor 1 pins
 //const byte mtr2 [2]; // motor 2 pins

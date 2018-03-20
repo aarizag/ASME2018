@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 
-f = open("/home/owner/Desktop/botJoystick.txt", "r")
+f = open("fullRotate.txt", "r")
 x = []
 y = []
 

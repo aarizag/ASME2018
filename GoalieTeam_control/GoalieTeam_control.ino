@@ -46,79 +46,68 @@ int xIN;
 int yIN;
 const float root2over2 = 0.7071068;
 
-void loop() {
+void loop() {  
+  // Control Servos
+  if (ps4.getButtonPress(R1)){
+    right.write(180);
+  }
+  else if (ps4.getButtonPress(R2)){
+    right.write(0);
+  }
+  if(ps4.getButtonPress(L1)){
+    left.write(180);
+  }
+  else if (ps4.getButtonPress(L2)){
+    left.write(0);
+  }
+  
+  xIN = ps4.getAnalogHat(LeftHatX);
+  yIN = ps4.getAnalogHat(LeftHatY);
 
-  right.write(180);
-  left.write(180);
-  Serial.println("0");
-  delay(500);
+  // Convert raw x and y to polar coordinates
+  float radius = sqrt((xIN * xIN) + (yIN * yIN));
+  float theta = acos(xIN / radius);
+
+  // subtract/add the appropriate
+  float RFandLB = theta + PI/4; 
+  float RBandLF = theta - PI/4;
+
+  analogWrite(mtrRF[2], cos(RFandLB) * 255);
+  analogWrite(mtrRB[2], cos(RBandLF) * 255);
+  analogWrite(mtrLF[2], cos(RFandLB) * 255);
+  analogWrite(mtrLB[2], cos(RBandLF) * 255);
+
+
+  //Move right front and left back wheels forwards
+  if (sin(RFandLB) > 0) {
+    digitalWrite(mtrRF[0], HIGH);
+    digitalWrite(mtrRF[1], LOW);
+    digitalWrite(mtrLB[0], HIGH);
+    digitalWrite(mtrLB[1], LOW);
+  }
+  //Move Backwards
+  else {
+    digitalWrite(mtrRF[0], LOW);
+    digitalWrite(mtrRF[1], HIGH);
+    digitalWrite(mtrLB[0], LOW);
+    digitalWrite(mtrLB[1], HIGH);
+  }
+
   
-  right.write(0);
-  left.write(0);
-  Serial.println("1");
-  delay(500);
-  
-//  // Control Servos
-//  if (ps4.getButtonPress(R1)){
-//    right.write(180);
-//  }
-//  else if (ps4.getButtonPress(R2)){
-//    right.write(0);
-//  }
-//  if(ps4.getButtonPress(L1)){
-//    left.write(180);
-//  }
-//  else if (ps4.getButtonPress(L2)){
-//    left.write(0);
-//  }
-//  
-//  xIN = ps4.getAnalogHat(LeftHatX);
-//  yIN = ps4.getAnalogHat(LeftHatY);
-//
-//  // Convert raw x and y to polar coordinates
-//  float radius = sqrt((xIN * xIN) + (yIN * yIN));
-//  float theta = acos(xIN / radius);
-//
-//  // subtract/add the appropriate
-//  float RFandLB = theta + PI/4; 
-//  float RBandLF = theta - PI/4;
-//
-//  analogWrite(mtrRF[2], cos(RFandLB) * 255);
-//  analogWrite(mtrRB[2], cos(RBandLF) * 255);
-//  analogWrite(mtrLF[2], cos(RFandLB) * 255);
-//  analogWrite(mtrLB[2], cos(RBandLF) * 255);
-//
-//
-//  //Move right front and left back wheels forwards
-//  if (sin(RFandLB) > 0) {
-//    digitalWrite(mtrRF[0], HIGH);
-//    digitalWrite(mtrRF[1], LOW);
-//    digitalWrite(mtrLB[0], HIGH);
-//    digitalWrite(mtrLB[1], LOW);
-//  }
-//  //Move Backwards
-//  else {
-//    digitalWrite(mtrRF[0], LOW);
-//    digitalWrite(mtrRF[1], HIGH);
-//    digitalWrite(mtrLB[0], LOW);
-//    digitalWrite(mtrLB[1], HIGH);
-//  }
-//
-//  
-//  //Move right back and left front wheels forwards
-//  if(sin(RBandLF) > 0){
-//    digitalWrite(mtrRB[0], HIGH);
-//    digitalWrite(mtrRB[1], LOW);
-//    digitalWrite(mtrLF[0], HIGH);
-//    digitalWrite(mtrLF[1], LOW);
-//  }
-//  // Move Backwards
-//  else{
-//    digitalWrite(mtrRB[0], LOW);
-//    digitalWrite(mtrRB[1], HIGH);
-//    digitalWrite(mtrLF[0], LOW);
-//    digitalWrite(mtrLF[1], HIGH);
-//  }
+  //Move right back and left front wheels forwards
+  if(sin(RBandLF) > 0){
+    digitalWrite(mtrRB[0], HIGH);
+    digitalWrite(mtrRB[1], LOW);
+    digitalWrite(mtrLF[0], HIGH);
+    digitalWrite(mtrLF[1], LOW);
+  }
+  // Move Backwards
+  else{
+    digitalWrite(mtrRB[0], LOW);
+    digitalWrite(mtrRB[1], HIGH);
+    digitalWrite(mtrLF[0], LOW);
+    digitalWrite(mtrLF[1], HIGH);
+  }
   Serial.println("GO");
 }
 

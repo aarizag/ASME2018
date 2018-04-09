@@ -4,7 +4,7 @@
 
 USB usb;
 BTD btd(&usb);
-PS3BT ps3(&btd, PAIR);
+PS3BT ps3(&btd);
 
 const byte mtr1 [2] = {9,10}; // motor 1 pins
 //const byte mtr2 [2]; // motor 2 pins
@@ -51,25 +51,25 @@ void loop (){
 //        Serial.println(debug);
 
         if (xOUT < 127){
-            digitalWrite(mtr1[1],HIGH);
+            digitalWrite(mtr1,HIGH);
             Serial.println(valCap(((255-xOUT) -127) * 2));
-            analogWrite(mtr1[0],valCap(((255-xOUT) -127) * 2));
+            analogWrite(mtr1,valCap(((255-xOUT) -127) * 2));
         }
         else {
-            digitalWrite(mtr1[1],LOW);
+            digitalWrite(mtr1,LOW);
             Serial.println(valCap((xOUT-127) * 2));
-            analogWrite(mtr1[0],valCap((xOUT-127) * 2));
+            analogWrite(mtr1,valCap((xOUT-127) * 2));
         }
-        if (yOUT < 127){
-            digitalWrite(mtr1[1],HIGH);
-            Serial.println(valCap(((255-yOUT) -127) * 2));
-            analogWrite(mtr1[0],valCap(((255-yOUT) -127) * 2));
-        }
-        else {
-            digitalWrite(mtr1[1],LOW);
-            Serial.println(valCap((yOUT-127) * 2));
-            analogWrite(mtr1[0],valCap((yOUT-127) * 2));
-        }
+//        if (yOUT < 127){
+//            digitalWrite(mtr1,HIGH);
+//            Serial.println(valCap(((255-yOUT) -127) * 2));
+//            analogWrite(mtr1,valCap(((255-yOUT) -127) * 2));
+//        }
+//        else {
+//            digitalWrite(mtr1,LOW);
+//            Serial.println(valCap((yOUT-127) * 2));
+//            analogWrite(mtr1,valCap((yOUT-127) * 2));
+//        }
     }
 }
 

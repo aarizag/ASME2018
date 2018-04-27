@@ -29,12 +29,11 @@ PS3BT PS3(&Btd);
 /* Motor Declarations */
 // Declare DC motor pins with the structure defined above
 DCmotor rightM {6, 7}; // Right motor
-DCmotor leftM {8, 9}; // Left motor
+DCmotor leftM {2, 3}; // Left motor
 
 // Declare Servos
 Servo arm;
-Servo launcherRight;
-Servo launcherLeft;
+Servo launcher;
 
 /* Setup function
  * Declare Serial Channel
@@ -61,11 +60,13 @@ void setup(){
 byte xIN; // x input from the ps3 controller
 byte yIN; // y input   ""    ""    ""
 
-int xRotate; // modified x, rotated each point ~45 deg Counter-Clockwise, along the square
-int yRotate; // modified y,    ""        ""        ""
+short xRotate; // modified x, rotated each point ~45 deg Counter-Clockwise, along the square
+short yRotate; // modified y,    ""        ""        ""
 
-byte rOUT; // output to the Right wheel deduced from the x-input
-byte lOUT; //output to the Left wheel deduced from the y-input
+short rOUT; // output to the Right wheel deduced from the x-input
+short lOUT; //output to the Left wheel deduced from the y-input
+
+short armPos = 90;
 
 bool start = false; // Prevent Servos from receiving ghost input before controller is connected
 
@@ -82,45 +83,58 @@ void loop (){
     if(PS3.getButtonPress(PS)) {
         start = true;
         // Attach servos to power once PS button is pressed
-        launcherRight.attach(4);
-        launcherLeft.attach(5);
-        arm.attach(3);
+        launcher.attach(5);
+        arm.attach(4);
     }
 
     if (start) {
         xIN = PS3.getAnalogHat(LeftHatX);
         yIN = PS3.getAnalogHat(LeftHatY);
+//        Serial.print("xIN , yIN:     ");
+//        Serial.print(xIN);
+//        Serial.print("  |    ");
+//        Serial.print(yIN);
+
+
         yRotate = valCap(yIN - (xIN - 127));
         xRotate = valCap(xIN + (yIN - 127));
+        Serial.print("         xR: ");
+        Serial.print(valCap(xIN + (yIN - 127)));
+        Serial.print("    |      yR: ");
+        Serial.print(valCap(yIN - (xIN - 127)));
 
+
+        /* Control the Robot with the JoyStick */
         // Control the right motor
         if (xRotate < 127){
             digitalWrite(rightM.dir, HIGH);
-            rOUT = (127-xRotate) * 2;
+            rOUT = (127-xRotate);
             analogWrite(rightM.pwm,rOUT);
         }
         else {
             // TODO TEST WHEEL CONTROL FOR rOUT > 127
             digitalWrite(rightM.dir, LOW);
-            rOUT = (xRotate-127) * 2;
+            rOUT = (xRotate-127);
             analogWrite(rightM.pwm, rOUT);
         }
         // Debug Serial Print
-        Serial.println(rOUT);
+        Serial.print("      |       Right- OUT");
+        Serial.print("0");
 
         // Control the left motor
         if (yRotate < 127){
             digitalWrite(leftM.dir, HIGH);
-            lOUT = (127-yRotate) * 2;
+            lOUT = (127-yRotate);
             analogWrite(leftM.pwm,lOUT);
         }
         else {
             // TODO TEST WHEEL CONTROL FOR lOUT > 127
             digitalWrite(leftM.dir, LOW);
-            lOUT = (yRotate-127) * 2;
+            lOUT = (yRotate-127);
             analogWrite(leftM.pwm, lOUT);
         }
         // Debug Serial Print
+        Serial.print("Left - OUT");
         Serial.println(lOUT);
 
         /* NOTE: The shape of the graph created by rOUT or lOUT resembles
@@ -130,27 +144,68 @@ void loop (){
          *       xRotate/yRotate approach 0 and 254.
          */
 
+        /* Control the robot with the D-Pad */
+        if (PS3.getButtonPress(UP)) {
+            digitalWrite(rightM.dir, HIGH);
+            digitalWrite(leftM.dir, HIGH);
+            analogWrite(rightM.pwm,254);
+            analogWrite(leftM.pwm,254);
+        }
+        else if (PS3.getButtonPress(LEFT)) {
+            digitalWrite(rightM.dir, HIGH);
+            digitalWrite(leftM.dir, LOW);
+            analogWrite(rightM.pwm,254);
+            analogWrite(leftM.pwm,254);
+        }
+        else if (PS3.getButtonPress(RIGHT)) {
+            digitalWrite(rightM.dir, LOW);
+            digitalWrite(leftM.dir, HIGH);
+            analogWrite(rightM.pwm,254);
+            analogWrite(leftM.pwm,254);
+        }
+        else if (PS3.getButtonPress(DOWN)) {
+            digitalWrite(rightM.dir, LOW);
+            digitalWrite(leftM.dir, LOW);
+            analogWrite(rightM.pwm,254);
+            analogWrite(leftM.pwm,254);
+        }
+        else {
+            digitalWrite(rightM.dir, LOW);
+            digitalWrite(leftM.dir, LOW);
+            analogWrite(rightM.pwm,0);
+            analogWrite(leftM.pwm,0);
+        }
+
+
         // Bring arm up
         if(PS3.getButtonPress(L1)){
             Serial.println("Arm Moving Up");
-            arm.write(150);
+            if (armPos >=40) {
+              armPos = armPos - 10;
+            }
+            arm.write(armPos);
         }
         // Bring arm down
         else if(PS3.getButtonPress(L2)){
             Serial.println("Arm Moving Down");
-            arm.write(30);
+            if (armPos <=140) {
+              armPos = armPos + 10;
+            }
+            arm.write(armPos);
+        }
+        else {
+            arm.write(armPos);
         }
 
         // Activate Launcher
         if (PS3.getButtonPress(R1)){
             Serial.println("I'M FIRIN MAH LAZERRRRRRRRR");
-            launcherRight.write(180);
-            launcherLeft.write(180);
+            launcher.write(180);
+            launcher.write(180);
         }
         // Deactivate Launcher
         else {
-            launcherRight.write(90);
-            launcherLeft.write(90);
+            launcher.write(90);
         }
     }
 }
@@ -163,8 +218,8 @@ void loop (){
  * Range max is 254 to prevent byte overflow of lOUT/rOUT when
  * xRotate/yRotate >= 127
  */
-int valCap(int val){
-    if (val > 122 && val < 132){
+short valCap(int val){
+    if (val > 117 && val < 137){
         return 127;
     }
     else if (val > 250){

@@ -1,0 +1,28 @@
+<launch>
+	
+ 		<!-- Launches the Arduino Tilt Mechanism & IMU ROS node -->
+    <!-- Baud 57600 is used to ensure compatibility between arduino and PC -->
+    <node pkg="rosserial_python" type="serial_node.py" name="serial_node2">
+        <param name="port" value="/dev/ttyACM0"/>
+        <param name="baud" value="57600"/>
+    </node> 
+	
+
+<!-- Launches the key stroke publisher and a new xterm to type in -->
+    <node
+        pkg="teleop"
+        type="key_publisher.py"
+        name="keyboard_driver"
+        launch-prefix="xterm -e"
+        respawn="true"
+    />
+
+    <!-- Launches the key to twist publisher -->
+    <node
+        pkg="teleop"
+        type="keys_to_twist.py"
+        name="keys_to_twist"
+        required="true"
+    />
+
+</launch>
